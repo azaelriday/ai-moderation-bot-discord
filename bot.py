@@ -9,13 +9,16 @@ PERSPECTIVE_API_KEY = 'YOUR_PERSPECTIVE_API_KEY'
 bot = commands.Bot(command_prefix='!')
 
 # Define a command to check a message using the Perspective API
-@bot.command(name='check', help='Check if a message is toxic')
-async def check_message(ctx, *, message):
+@bot.event
+async def on_message(message):
+    if message.author == bot.user:
+        return  # Ignore messages from the bot itself
+
     perspective_url = 'https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze'
 
     # Set up the API request payload
     data = {
-        'comment': {'text': message},
+        'comment': {'text': message.content},
         'languages': ['en'],
         'requestedAttributes': {'TOXICITY': {}},
     }
@@ -30,9 +33,10 @@ async def check_message(ctx, *, message):
     # Check if the message is toxic
     toxicity_score = result['attributeScores']['TOXICITY']['summaryScore']['value']
     if toxicity_score >= 0.7:
-        await ctx.send(f'Toxic message detected: {message}')
-    else:
-        await ctx.send(f'Non-toxic message: {message}')
+        await message.delete()
+        await message.channel.send(f'Message by {message.author.display_name} deleted due to toxicity.')
+
+    await bot.process_commands(message)
 
 # Event to print a message when the bot is ready
 @bot.event
