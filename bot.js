@@ -1,18 +1,16 @@
 const Discord = require('discord.js');
-require('dotenv').config();
-
 const client = new Discord.Client();
 
-client.on('message', message => {
-  if (message.content.includes('lemon')) {
-    message.delete()
-      .then(msg => console.log(`Deleted message from ${msg.author.username} containing the word "lemon"`))
-      .catch(console.error);
-  }
-});
-
 client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}`);
+    console.log(`Logged in as ${client.user.tag}!`);
 });
 
-client.login(process.env.DISCORD_TOKEN); // Your Discord Bot Token
+client.on('message', msg => {
+    if (msg.content.includes('lemon')) {
+        msg.delete()
+            .then(deletedMsg => console.log(`Deleted message from ${deletedMsg.author.username}`))
+            .catch(error => console.error('Could not delete message due to:', error));
+    }
+});
+
+client.login('YOUR_BOT_TOKEN');
